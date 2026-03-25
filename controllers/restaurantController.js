@@ -76,30 +76,28 @@ const getAllRestaurantController = async (req, res) => {
     console.log(error);
     return res.status(500).send({
       success: false,
-      message: "Error in Get All restaurant API",
+      message: "Error in get all restaurant Api",
       error,
     });
   }
 };
 
-const getSingleRestaurantController =async (req,res) => {
+const getSingleRestaurantController = async (req, res) => {
   try {
+    const restaurantId = req.params.id;
 
-    const restaurantId=req.params.id;
-
-    const restaurant=await restaurantModel.findById(restaurantId)
-    if(!restaurant){
+    const restaurant = await restaurantModel.findById(restaurantId);
+    if (!restaurant) {
       return res.status(404).send({
-        success:false,
-        message:'NO restaurant found'
-      })
+        success: false,
+        message: "NO restaurant found",
+      });
     }
 
     return res.status(200).send({
-      success:true,
-      restaurant
-    })
-
+      success: true,
+      restaurant,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).send({
@@ -110,8 +108,38 @@ const getSingleRestaurantController =async (req,res) => {
   }
 };
 
+const deleteRestaurantController=async(req,res)=>{
+  try {
+
+    const Id=req.params.id;
+    const restaurant=await restaurantModel.findByIdAndDelete(Id)
+
+    if(!restaurant){
+      return res.status(404).send({
+        success:false,
+
+        message:'No restaurant Found'
+      })
+    }
+
+    return res.status(200).send({
+      success:true,
+      message:'restaurant Deleted Successfully'
+    })
+    
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send({
+      success:false,
+      message:'Error in Delete restaurant API',
+      error
+    })
+  }
+};
+
 module.exports = {
   createRestaurantController,
   getAllRestaurantController,
   getSingleRestaurantController,
+  deleteRestaurantController,
 };
