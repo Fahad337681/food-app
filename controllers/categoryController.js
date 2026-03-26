@@ -25,10 +25,38 @@ const createController = async (req, res) => {
     });
   }
 };
+const getAllCategoryController = async (req, res) => {
+  try {
+    const categories = await categoryModel.find({});
+    if (!categories) {
+      return res.status(404).send({
+        success: false,
+        message: "No Categories Found",
+      });
+    }
+    return res.status(200).send({
+      success: true,
+      totalCategories: categories.length,
+      categories,
+    });
+  } catch (error) {
+    return res.status(500).send({
+      success: false,
+      message: "Error in Get All Category API",
+      error,
+    });
+  }
+};
 
 const deleteCategoryController = async (req, res) => {
   try {
     const id = req.params.id;
+    if (!id) { 
+      return res.status(500).send({
+        success: false,
+        message: "Please Provide category ID",
+      });
+    }
     const category = await categoryModel.findByIdAndDelete(id);
     if (!category) {
       return res.status(404).send({
@@ -79,4 +107,5 @@ module.exports = {
   createController,
   deleteCategoryController,
   updateCategoryController,
+  getAllCategoryController,
 };
