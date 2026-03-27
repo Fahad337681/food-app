@@ -1,4 +1,6 @@
+const orderModel = require("../models/orderModel");
 const foodModel = require("../models/foodModel");
+
 
 const createFoodController = async (req, res) => {
   try {
@@ -88,7 +90,7 @@ const getSingleFoodController = async (req, res) => {
     if (!food) {
       return res.status(404).send({
         success: false,
-        message: "No food For this Id Found", // ✅ small m
+        message: "No food For this Id Found", 
       });
     }
 
@@ -117,17 +119,17 @@ const getFoodByRestaurantController = async (req, res) => {
       });
     }
 
-    const food = await foodModel.find({restaurant:restaurantId});
+    const food = await foodModel.find({ restaurant: restaurantId });
     if (!food) {
       return res.status(404).send({
         success: false,
-        message: "No food For this Id Found", 
+        message: "No food For this Id Found",
       });
     }
 
     return res.status(200).send({
       success: true,
-      message:'Food bases on restaurant',
+      message: "Food bases on restaurant",
       food,
     });
   } catch (error) {
@@ -139,10 +141,99 @@ const getFoodByRestaurantController = async (req, res) => {
     });
   }
 };
+const updateFoodController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const updatedData = req.body;
+    if (!id) {
+      return res.status(500).send({
+        success: false,
+        message: "Please provide Id",
+      });
+    }
+    const food = await foodModel.findByIdAndUpdate(id, updatedData, {
+      new: true,
+    });
+    return res.status(200).send({
+      success: true,
+      food,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(200).send({
+      success: false,
+      message: "Error in Food Update API",
+    });
+  }
+};
 
+const foodDeleteController = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    if (!id) {
+      return res.status(400).send({
+        success: false,
+        message: "Please provide a valid Food ID",
+      });
+    }
+
+    const deletedFood = await foodModel.findByIdAndDelete(id);
+
+    if (!deletedFood) {
+      return res.status(404).send({
+        success: false,
+        message: "Food item not found in database!",
+      });
+    }
+
+    return res.status(200).send({
+      success: true,
+      message: "Food item deleted successfully from DB",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: "Error in Food Delete API",
+      error: error.message,
+    });
+  }
+};
+
+const placeOrderController = async (req, res) => {
+  try {
+    const { cart, payment } = req.body;
+    if (!cart || !payment) {
+      return res.status(404).send({
+        success: false,
+        message: "please add food cart or payment method",
+      });
+    }
+    let total = 0;
+    cart.forEach((cart) => {
+      total += cart.price * cart.quantity;
+    });
+    const newOrder=new orderModel({
+      food:cart,
+      payment,
+      buyer:req.body.id
+    })
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: "Error in Place Order API",
+      error,
+    });
+  }
+};
 module.exports = {
   createFoodController,
   getAllFoodController,
   getSingleFoodController,
   getFoodByRestaurantController,
+  updateFoodController,
+  foodDeleteController,
+  placeOrderController,
 };
