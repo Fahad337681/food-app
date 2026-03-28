@@ -20,6 +20,6 @@ router.get("/getByRestaurant/:id", getFoodByRestaurantController);
 router.put("/update/:id", authMiddleware, updateFoodController);
 router.delete("/delete/:id", foodDeleteController);
 //PLACE ORDER
-router.post("/placeOrder", authMiddleware, placeOrderController);
+router.post("/placeOrder/:orderId", authMiddleware, placeOrderController);
 
 module.exports = router;

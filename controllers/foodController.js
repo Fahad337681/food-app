@@ -1,7 +1,6 @@
 const orderModel = require("../models/orderModel");
 const foodModel = require("../models/foodModel");
 
-
 const createFoodController = async (req, res) => {
   try {
     const {
@@ -90,7 +89,7 @@ const getSingleFoodController = async (req, res) => {
     if (!food) {
       return res.status(404).send({
         success: false,
-        message: "No food For this Id Found", 
+        message: "No food For this Id Found",
       });
     }
 
@@ -205,29 +204,38 @@ const placeOrderController = async (req, res) => {
   try {
     const { cart, payment } = req.body;
     if (!cart || !payment) {
-      return res.status(404).send({
+      return res.status(500).send({
         success: false,
-        message: "please add food cart or payment method",
+        message: "please food cart or payment method",
       });
     }
+
     let total = 0;
-    cart.forEach((cart) => {
-      total += cart.price * cart.quantity;
+    cart.map((i) => {
+      total += i.price;
     });
-    const newOrder=new orderModel({
-      food:cart,
-      payment,
-      buyer:req.body.id
-    })
+
+    const newOrder = new orderModel({
+      foods: cart,
+      payment:payment,
+      buyer: req.userId,
+    });
+
+    res.status(201).send({
+      success: true,
+      message: "Order Placed successfully",
+      newOrder,
+    });
+    await newOrder.save();
   } catch (error) {
-    console.log(error);
-    return res.status(500).send({
-      success: false,
-      message: "Error in Place Order API",
-      error,
-    });
-  }
-};
+    console.log(error)
+      return res.status(500).send({
+        success:false,
+        message:'Error in Place order API',
+        error
+      })
+    }
+  };
 module.exports = {
   createFoodController,
   getAllFoodController,
