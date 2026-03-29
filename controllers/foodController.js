@@ -217,7 +217,7 @@ const placeOrderController = async (req, res) => {
 
     const newOrder = new orderModel({
       foods: cart,
-      payment:payment,
+      payment: payment,
       buyer: req.userId,
     });
 
@@ -228,14 +228,61 @@ const placeOrderController = async (req, res) => {
     });
     await newOrder.save();
   } catch (error) {
-    console.log(error)
-      return res.status(500).send({
-        success:false,
-        message:'Error in Place order API',
-        error
-      })
+    console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: "Error in Place order API",
+      error,
+    });
+  }
+};
+const orderStatusController = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+
+    if (!orderId) {
+      return res.status(400).send({
+        success: false,
+        message: "Please provide order id",
+      });
     }
-  };
+
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).send({
+        success: false,
+        message: "Please provide status",
+      });
+    }
+
+    const order = await orderModel.findByIdAndUpdate(
+      orderId,
+      { status },
+      { new: true },
+    );
+
+    if (!order) {
+      return res.status(404).send({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    return res.status(200).send({
+      success: true,
+      message: "Order status updated successfully",
+      order,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: "Error in order status API",
+      error,
+    });
+  }
+};
 module.exports = {
   createFoodController,
   getAllFoodController,
@@ -244,4 +291,5 @@ module.exports = {
   updateFoodController,
   foodDeleteController,
   placeOrderController,
+  orderStatusController,
 };
